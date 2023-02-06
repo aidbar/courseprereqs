@@ -1,0 +1,17 @@
+{
+  "name": "courseprereqs",
+  "version": "1.0.0",
+  "description": "HTI.550 Assignment 2 extension by Aide Barniskyte",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "dependencies" :{
+    "express": "^4.17.1",
+    "express-handlebars": "^6.0.2",
+    "nodemon": "^2.0.15"
+  },
+  "author": "Aide Barniskyte",
+  "license": "ISC"
+}
