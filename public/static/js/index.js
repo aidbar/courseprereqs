@@ -2,7 +2,7 @@ import * as d3 from "https://cdn.skypack.dev/d3@7";
 import axios from 'https://cdn.skypack.dev/axios';
 
 const dataSet = async function getData() {
-    return await axios.get('/api/data');
+    return await axios.get('/data');
 }
 async function drawChart() {
     const data = await dataSet();

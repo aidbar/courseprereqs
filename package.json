@@ -12,6 +12,10 @@
     "express-handlebars": "^6.0.2",
     "nodemon": "^2.0.15"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aidbar/courseprereqs.git"
+  },
   "author": "Aide Barniskyte",
   "license": "ISC"
 }
