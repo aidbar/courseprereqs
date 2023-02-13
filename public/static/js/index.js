@@ -8,6 +8,11 @@ const dataSet = async function getData() {
 var courseData = [];
 var selectedCourse = "";
 
+var graphNodeData = [];
+var selectedCourseIndex = -1;
+
+var nodeIndex = 1;
+
 function hasJsonStructure(str) {
     if (typeof str === 'string') return false;
     try {
@@ -39,6 +44,43 @@ function walk2(obj2,level) {
 
 function getNodes(selectedCourse) {
     console.log("getNodes() is running.");
+    
+    for (var i = 0; i <courseData.length; i++) {
+        var node = {};
+        if (courseData[i].groupId == selectedCourse) {
+            console.log("found");
+            selectedCourseIndex = i;
+            node = {"id": nodeIndex, "name": courseData[i].name.en}
+            nodeIndex++;
+            graphNodeData.push(node);
+            break;
+        }
+    }
+    if (selectedCourseIndex != -1) {
+        getRecursive(selectedCourseIndex, "prerequisites");
+        getRecursive(selectedCourseIndex, "recommendedFormalPrerequisites");
+        getRecursive(selectedCourseIndex, "compulsoryFormalPrerequisites");
+    }
+    console.log(graphNodeData);
+}
+
+function getRecursive(index, type) {
+    console.log("getRecursive running.");
+
+    var searchArea = [];
+    switch(type) {
+        case "prerequisites":
+            searchArea = courseData[index].prerequisites;
+            break;
+        case "recommendedFormalPrerequisites":
+            searchArea = courseData[index].recommendedFormalPrerequisites;
+            break;
+        case "compulsoryFormalPrerequisites":
+            searchArea = courseData[index].compulsoryFormalPrerequisites;
+            break;
+        default:
+            searchArea = [];
+    }
 }
 
 function onChange(event) {
