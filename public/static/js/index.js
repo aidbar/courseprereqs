@@ -9,6 +9,8 @@ var courseData = [];
 var selectedCourse = "";
 
 var graphNodeData = [];
+var graphLinkData = [];
+
 var selectedCourseIndex = -1;
 
 var nodeIndex = 1;
@@ -44,9 +46,13 @@ function walk2(obj2,level) {
 
 function getNodes(selectedCourse) {
     console.log("getNodes() is running.");
+
+    graphNodeData = [];
+    graphLinkData = [];
     
     for (var i = 0; i <courseData.length; i++) {
         var node = {};
+        //getting the initial node of the graph (the selected course)
         if (courseData[i].groupId == selectedCourse) {
             console.log("found");
             selectedCourseIndex = i;
@@ -55,6 +61,7 @@ function getNodes(selectedCourse) {
             graphNodeData.push(node);
             break;
         }
+        selectedCourseIndex = -1;
     }
     if (selectedCourseIndex != -1) {
         getRecursive(selectedCourseIndex, "prerequisites");
@@ -62,6 +69,7 @@ function getNodes(selectedCourse) {
         getRecursive(selectedCourseIndex, "compulsoryFormalPrerequisites");
     }
     console.log(graphNodeData);
+    console.log(graphLinkData);
 }
 
 function getRecursive(index, type) {
@@ -70,17 +78,75 @@ function getRecursive(index, type) {
     var searchArea = [];
     switch(type) {
         case "prerequisites":
-            searchArea = courseData[index].prerequisites;
+            if (courseData[index].prerequisites != null) {
+                searchArea = courseData[index].prerequisites;
+                console.log(courseData[index])
+                console.log(searchArea);
+                if (searchArea != null) {
+                    for (var i = 0; i < searchArea.length; i++) {
+                        var node = {"id": nodeIndex, "name": searchArea[i].en}
+                        nodeIndex++;
+                        graphNodeData.push(node);  
+                        var link = {"source": index, "target": nodeIndex}
+                        graphLinkData.push(link);
+                    }
+                }
+            }
             break;
         case "recommendedFormalPrerequisites":
-            searchArea = courseData[index].recommendedFormalPrerequisites;
+            if (searchArea != null) {
+                searchArea = courseData[index].recommendedFormalPrerequisites;
+                console.log("searchArea is:");
+                console.log(searchArea);
+                for (var i = 0; i < searchArea.length; i++) {
+                    var prereqGroup = searchArea[i].prerequisites;
+                    console.log(prereqGroup);
+                    for (var j = 0; j < prereqGroup.length; j++) {
+                        console.log(prereqGroup[j]);
+                        addNodeByGroupId(index, prereqGroup[j].courseUnitGroupId);
+                    }
+                }
+            }
             break;
         case "compulsoryFormalPrerequisites":
-            searchArea = courseData[index].compulsoryFormalPrerequisites;
+            if (searchArea != null) {
+                searchArea = courseData[index].compulsoryFormalPrerequisites;
+                console.log("searchArea is:");
+                console.log(searchArea);
+                for (var i = 0; i < searchArea.length; i++) {
+                    var prereqGroup = searchArea[i].prerequisites;
+                    console.log(prereqGroup);
+                    for (var j = 0; j < prereqGroup.length; j++) {
+                        console.log(prereqGroup[j]);
+                        addNodeByGroupId(index, prereqGroup[j].courseUnitGroupId);
+                    }
+                }
+            }
             break;
         default:
             searchArea = [];
     }
+}
+
+function addNodeByGroupId(index, groupId) {
+    var course = [];
+    var courseIndex = -1;
+    for (var i = 0; i <courseData.length; i++) {
+        if (courseData[i].groupId == groupId) {
+            course = courseData[i];
+            courseIndex = i
+            break;
+        }
+    }
+    var node = {"id": nodeIndex, "name": course.name.en}
+    nodeIndex++;
+    graphNodeData.push(node);  
+    var link = {"source": index, "target": nodeIndex}
+    graphLinkData.push(link);
+
+    getRecursive(courseIndex, "prerequisites"); 
+    getRecursive(courseIndex, "recommendedFormalPrerequisites"); 
+    getRecursive(courseIndex, "compulsoryFormalPrerequisites"); 
 }
 
 function onChange(event) {
