@@ -37,15 +37,21 @@ function walk2(obj2,level) {
       return outer
 }
 
-function getNodes() {
+function getNodes(selectedCourse) {
     console.log("getNodes() is running.");
 }
 
-function onChange() {
+function onChange(event) {
     console.log("*********************onChange event listener");
+    console.log(event);
+    var dropdown = document.getElementById("select");
+    selectedCourse = dropdown.value;
+    //var text = dropdown.options[dropdown.selectedIndex].text;
+    console.log(selectedCourse);
+    getNodes(selectedCourse);
 }
 
-async function drawGraph() {
+async function initialize() {
     const data = await dataSet();
     console.log(data);
 
@@ -95,4 +101,4 @@ async function drawGraph() {
         })
         .style("fill", "steelblue");*/
 }
-drawGraph();
+initialize();
