@@ -11,6 +11,8 @@ var selectedCourse = "";
 var graphNodeData = [];
 var graphLinkData = [];
 
+var graphData = {};
+
 var selectedCourseIndex = -1;
 
 var nodeIndex = 1;
@@ -73,10 +75,14 @@ function getNodes(selectedCourse) {
 }
 
 function getRecursive(index, type) {
-    console.log("getRecursive running.");
+    console.log("getRecursive running, index is " + index);
 
     var possibleParent = getParentNodeIndex(courseData[index]);
     if (possibleParent != -1) parentNodeIndex = possibleParent;
+
+    var nextIndex = -1;
+
+    var hasMorePrereqs = false;
 
     var searchArea = [];
     switch(type) {
@@ -84,8 +90,9 @@ function getRecursive(index, type) {
             if (courseData[index].prerequisites != null) {
                 searchArea = courseData[index].prerequisites;
                 console.log(courseData[index])
-                console.log(searchArea);
+                if (searchArea.length > 0) console.log(searchArea);
                 if (searchArea != null) {
+                    //hasMorePrereqs = true;
                     for (var i = 0; i < searchArea.length; i++) {
                         var node = {"id": nodeIndex, "name": searchArea[i].en}
                         graphNodeData.push(node);  
@@ -101,11 +108,14 @@ function getRecursive(index, type) {
                 searchArea = courseData[index].recommendedFormalPrerequisites;
                 console.log("searchArea is:");
                 console.log(searchArea);
+                if (searchArea.length > 0) hasMorePrereqs = true;
                 for (var i = 0; i < searchArea.length; i++) {
                     var prereqGroup = searchArea[i].prerequisites;
                     console.log(prereqGroup);
                     for (var j = 0; j < prereqGroup.length; j++) {
                         console.log(prereqGroup[j]);
+                        console.log("prereqGroup.lenght is " + prereqGroup.length + ",index is " + index);
+                        nextIndex = indexFromGroupId(prereqGroup[j].courseUnitGroupId);
                         addNodeByGroupId(index, prereqGroup[j].courseUnitGroupId);
                     }
                 }
@@ -116,11 +126,14 @@ function getRecursive(index, type) {
                 searchArea = courseData[index].compulsoryFormalPrerequisites;
                 console.log("searchArea is:");
                 console.log(searchArea);
+                if (searchArea.length > 0) hasMorePrereqs = true;
                 for (var i = 0; i < searchArea.length; i++) {
                     var prereqGroup = searchArea[i].prerequisites;
                     console.log(prereqGroup);
+                    console.log("prereqGroup.lenght is " + prereqGroup.length + ",index is " + index);
                     for (var j = 0; j < prereqGroup.length; j++) {
                         console.log(prereqGroup[j]);
+                        nextIndex = indexFromGroupId(prereqGroup[j].courseUnitGroupId);
                         addNodeByGroupId(index, prereqGroup[j].courseUnitGroupId);
                     }
                 }
@@ -128,7 +141,24 @@ function getRecursive(index, type) {
             break;
         default:
             searchArea = [];
+
+        if (nextIndex != -1) { 
+            getAllRecursives(nextIndex);
+        } else {
+            console.log("nextIndex is -1");
+            drawGraph();
+        }
     }
+}
+
+function indexFromGroupId(groupId) {
+    for (var i = 0; i <courseData.length; i++) {
+        if (courseData[i].groupId == groupId) {
+            console.log("indexFromGroupId to return " + i);
+            return i;
+        }
+    }
+    return -1;
 }
 
 function addNodeByGroupId(index, groupId) {
@@ -178,6 +208,21 @@ function onChange(event) {
     getNodes(selectedCourse);
 }
 
+function onClick(event) {
+    if (document.getElementById("select").value != "") {
+        document.getElementById("message").innerText = "";
+        drawGraph();
+    } else {
+        document.getElementById("message").innerText = "No course selected.";
+    }
+}
+
+function drawGraph() {
+    console.log("drawGraph running");
+    graphData = {"nodes" : graphNodeData, "links": graphLinkData};
+    console.log(graphData);
+}
+
 async function initialize() {
     const data = await dataSet();
     console.log(data);
@@ -200,6 +245,7 @@ async function initialize() {
     console.log("dropdown is:");
     console.log(dropdown);
     dropdown.addEventListener("change",onChange);
+    document.getElementById("drawbutton").addEventListener("click", onClick);
 
     //getNodes(courseData);
     
