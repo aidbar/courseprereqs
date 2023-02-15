@@ -75,6 +75,9 @@ function getNodes(selectedCourse) {
 function getRecursive(index, type) {
     console.log("getRecursive running.");
 
+    var possibleParent = getParentNodeIndex(courseData[index]);
+    if (possibleParent != -1) parentNodeIndex = possibleParent;
+
     var searchArea = [];
     switch(type) {
         case "prerequisites":
@@ -146,6 +149,17 @@ function addNodeByGroupId(index, groupId) {
 
 
     getAllRecursives(courseIndex);
+}
+
+function getParentNodeIndex(course) {
+    for (var i = 0; i <courseData.length; i++) {
+        for (var j = 0; j < graphNodeData.length; j++) {
+            if (courseData[i].name.en = graphNodeData[j].name) {
+                return j+1;
+            }
+        }
+    }
+    return -1;
 }
 
 function getAllRecursives(index) {
