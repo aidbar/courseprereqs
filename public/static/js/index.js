@@ -14,6 +14,7 @@ var graphLinkData = [];
 var selectedCourseIndex = -1;
 
 var nodeIndex = 1;
+var parentNodeIndex = 1;
 
 function hasJsonStructure(str) {
     if (typeof str === 'string') return false;
@@ -64,9 +65,8 @@ function getNodes(selectedCourse) {
         selectedCourseIndex = -1;
     }
     if (selectedCourseIndex != -1) {
-        getRecursive(selectedCourseIndex, "prerequisites");
-        getRecursive(selectedCourseIndex, "recommendedFormalPrerequisites");
-        getRecursive(selectedCourseIndex, "compulsoryFormalPrerequisites");
+        parentNodeIndex = 1;
+        getAllRecursives(selectedCourseIndex);
     }
     console.log(graphNodeData);
     console.log(graphLinkData);
@@ -85,10 +85,10 @@ function getRecursive(index, type) {
                 if (searchArea != null) {
                     for (var i = 0; i < searchArea.length; i++) {
                         var node = {"id": nodeIndex, "name": searchArea[i].en}
-                        nodeIndex++;
                         graphNodeData.push(node);  
-                        var link = {"source": index, "target": nodeIndex}
+                        var link = {"source": parentNodeIndex, "target": nodeIndex} //nodeIndex-1
                         graphLinkData.push(link);
+                        nodeIndex++;
                     }
                 }
             }
@@ -139,14 +139,19 @@ function addNodeByGroupId(index, groupId) {
         }
     }
     var node = {"id": nodeIndex, "name": course.name.en}
-    nodeIndex++;
     graphNodeData.push(node);  
-    var link = {"source": index, "target": nodeIndex}
+    var link = {"source": parentNodeIndex, "target": nodeIndex} //nodeIndex-1
+    nodeIndex++;
     graphLinkData.push(link);
 
-    getRecursive(courseIndex, "prerequisites"); 
-    getRecursive(courseIndex, "recommendedFormalPrerequisites"); 
-    getRecursive(courseIndex, "compulsoryFormalPrerequisites"); 
+
+    getAllRecursives(courseIndex);
+}
+
+function getAllRecursives(index) {
+    getRecursive(index, "prerequisites"); 
+    getRecursive(index, "recommendedFormalPrerequisites"); 
+    getRecursive(index, "compulsoryFormalPrerequisites"); 
 }
 
 function onChange(event) {
