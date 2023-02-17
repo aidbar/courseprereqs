@@ -21,6 +21,8 @@ var parentNodeIndex = 1;
 var link;
 var node;
 
+var text;
+
 function hasJsonStructure(str) {
     if (typeof str === 'string') return false;
     try {
@@ -256,9 +258,36 @@ function drawGraph() {
     .selectAll("circle")
     .data(graphData.nodes)
     .enter()
+    //.append("g")
     .append("circle")
+        .attr("cx", function(d) { return d.x })
+        .attr("cy", function(d) { return d.y })
         .attr("r", 20)
         .style("fill", "#69b3a2")
+        .attr("fill-opacity","0.5")
+
+    console.log(graphData.nodes);
+
+    text = svg
+    .selectAll("text")
+    .data(graphData.nodes)
+    .enter()
+    .append("text")
+        //.attr("x", function(d) { return d.x })
+        //.attr("y", function(d) { return d.y })
+        .attr("font-size", "10px")
+        .attr("fill", "black")
+        .text(function(d) { return d.name });
+
+    /*node.append("text")
+        /*.attr("dx", 20)*--/
+        .attr("dy", "20")
+        .attr("font-size", "10px")
+        .attr("fill", "black")
+        .attr("overflow-wrap", "break-word")
+        .text(function(d) { return d.name });*/
+
+    
     
     console.log("**************link, node");
 
@@ -288,6 +317,9 @@ function ticked() {
     node
         .attr("cx", function (d) { return d.x+6; })
         .attr("cy", function(d) { return d.y-6; });
+    text
+        .attr("x", function(d) { return d.x })
+        .attr("y", function(d) { return d.y })
 }
     
 
