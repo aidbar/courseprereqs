@@ -23,35 +23,6 @@ var node;
 
 var text;
 
-function hasJsonStructure(str) {
-    if (typeof str === 'string') return false;
-    try {
-        return Object.prototype.toString.call(str) === '[object Object]' || Array.isArray(str);
-    } catch (err) {
-        return false;
-    }
-};
-
-
-//Parse and convert object recursive
-function walk2(obj2,level) {
-    var mytempCH = [];
-    var outer = [];
-    for (var key in obj2){
-        var value = obj2[key];
-        if(hasJsonStructure(value)){
-            //has children
-            var mytempCH2 = new Object();
-            mytempCH2.name = key;
-            mytempCH2.children = walk2(value,level+1);
-            outer.push(mytempCH2);
-        }else{
-            outer.push({"name": key + ": " + value, "value": level})
-        }
-      }
-      return outer
-}
-
 function getNodes(selectedCourse) {
     console.log("getNodes() is running.");
 
@@ -87,8 +58,6 @@ function getRecursive(index, type) {
 
     var nextIndex = -1;
 
-    var hasMorePrereqs = false;
-
     var searchArea = [];
     switch(type) {
         case "prerequisites":
@@ -97,7 +66,6 @@ function getRecursive(index, type) {
                 console.log(courseData[index])
                 if (searchArea.length > 0) console.log(searchArea);
                 if (searchArea != null) {
-                    //hasMorePrereqs = true;
                     for (var i = 0; i < searchArea.length; i++) {
                         var node = {"id": nodeIndex, "name": searchArea[i].en}
                         graphNodeData.push(node);  
@@ -113,7 +81,6 @@ function getRecursive(index, type) {
                 searchArea = courseData[index].recommendedFormalPrerequisites;
                 console.log("searchArea is:");
                 console.log(searchArea);
-                if (searchArea.length > 0) hasMorePrereqs = true;
                 for (var i = 0; i < searchArea.length; i++) {
                     var prereqGroup = searchArea[i].prerequisites;
                     console.log(prereqGroup);
@@ -131,7 +98,6 @@ function getRecursive(index, type) {
                 searchArea = courseData[index].compulsoryFormalPrerequisites;
                 console.log("searchArea is:");
                 console.log(searchArea);
-                if (searchArea.length > 0) hasMorePrereqs = true;
                 for (var i = 0; i < searchArea.length; i++) {
                     var prereqGroup = searchArea[i].prerequisites;
                     console.log(prereqGroup);
@@ -182,7 +148,6 @@ function addNodeByGroupId(index, groupId) {
     nodeIndex++;
     graphLinkData.push(link);
 
-
     getAllRecursives(courseIndex);
 }
 
@@ -208,7 +173,6 @@ function onChange(event) {
     console.log(event);
     var dropdown = document.getElementById("select");
     selectedCourse = dropdown.value;
-    //var text = dropdown.options[dropdown.selectedIndex].text;
     console.log(selectedCourse);
     getNodes(selectedCourse);
 }
@@ -243,8 +207,6 @@ function drawGraph() {
 
     console.log("**************************after var svg");
 
-    //d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_network.json", function( data) {
-
     // Initialize the links
     link = svg
     .selectAll("line")
@@ -258,7 +220,6 @@ function drawGraph() {
     .selectAll("circle")
     .data(graphData.nodes)
     .enter()
-    //.append("g")
     .append("circle")
         .attr("cx", function(d) { return d.x })
         .attr("cy", function(d) { return d.y })
@@ -273,32 +234,19 @@ function drawGraph() {
     .data(graphData.nodes)
     .enter()
     .append("text")
-        //.attr("x", function(d) { return d.x })
-        //.attr("y", function(d) { return d.y })
         .attr("font-size", "10px")
         .attr("fill", "black")
         .text(function(d) { return d.name });
-
-    /*node.append("text")
-        /*.attr("dx", 20)*--/
-        .attr("dy", "20")
-        .attr("font-size", "10px")
-        .attr("fill", "black")
-        .attr("overflow-wrap", "break-word")
-        .text(function(d) { return d.name });*/
-
-    
     
     console.log("**************link, node");
 
-    // Let's list the force we wanna apply on the network
     var simulation = d3.forceSimulation(graphData.nodes)                 // Force algorithm is applied to data.nodes
-        .force("link", d3.forceLink()                               // This force provides links between nodes
-            .id(function(d) { return d.id; })                     // This provide  the id of a node
-            .links(graphData.links)                                    // and this the list of links
+        .force("link", d3.forceLink()
+            .id(function(d) { return d.id; })
+            .links(graphData.links)
         )
-        .force("charge", d3.forceManyBody().strength(-400))         // This adds repulsion between nodes. Play with the -400 for the repulsion strength
-        .force("center", d3.forceCenter(width / 2, height / 2))     // This force attracts nodes to the center of the svg area
+        .force("charge", d3.forceManyBody().strength(-400))
+        .force("center", d3.forceCenter(width / 2, height / 2))
         .on("end", ticked);
 
     //});
@@ -327,15 +275,6 @@ async function initialize() {
     const data = await dataSet();
     console.log(data);
 
-    /*var myNewObj = new Object();
-    myNewObj.name = "ConvertedObj";
-    myNewObj.children = [];
-    var level = 1;
-    //Start work
-    myNewObj.children = walk2(data,1);
-
-    console.log(myNewObj);*/
-
     courseData = data.data;
     console.log(courseData);
 
@@ -347,31 +286,5 @@ async function initialize() {
     dropdown.addEventListener("change",onChange);
     document.getElementById("drawbutton").addEventListener("click", onClick);
 
-    //getNodes(courseData);
-    
-    /*const data = await dataSet();
-    const svgWidth = 500;
-    const svgHeight = 500;
-    const barPadding = 5;
-    const barWidth = svgWidth / data.data.length;
-
-    let svg = d3.select("svg");
-    let width = svg
-        .attr("width", svgWidth)
-        .attr("height", svgHeight);
-
-    svg
-        .selectAll("rect")
-        .data(data.data)
-        .enter()
-        .append("rect")
-        .attr("y", (d) => svgHeight - d)
-        .attr("height", (d) => d)
-        .attr("width", () => barWidth - barPadding)
-        .attr("transform", (d, i) => {
-            let translate = [barWidth * i, 0];
-            return `translate(${translate})`;
-        })
-        .style("fill", "steelblue");*/
 }
 initialize();
